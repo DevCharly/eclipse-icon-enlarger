@@ -45,62 +45,8 @@ public class FixIconsProcessor
 						|| file.getName().toLowerCase().endsWith(".jar")) {
 					logger.info("Processing archive file: "
 							+ file.getAbsolutePath());
-					ZipFile zipSrc = null;
-					ZipOutputStream outStream = null;
-					try
-					{
-						zipSrc = new ZipFile(file);
-						Enumeration<? extends ZipEntry> srcEntries = zipSrc.entries();
 
-						outStream = new ZipOutputStream(
-								new FileOutputStream(targetFile));
-
-						while (srcEntries.hasMoreElements()) {
-							ZipEntry entry = (ZipEntry) srcEntries.nextElement();
-							logger.info("Processing zip entry [" + entry.getName()
-									+ "]");
-
-							ZipEntry newEntry = new ZipEntry(entry.getName());
-							try {
-								outStream.putNextEntry(newEntry);
-							} catch (Exception e) {
-								if (!e.getMessage().startsWith("duplicate entry: ")) {
-									logger.log(Level.SEVERE, "Error: ", e);
-								} else {
-									logger.log(Level.SEVERE, e.getMessage(), e);
-								}
-								outStream.closeEntry();
-								continue;
-							}
-
-							BufferedInputStream bis = new BufferedInputStream(
-									zipSrc.getInputStream(entry));
-
-							if (ImageType.findType(entry.getName()) != null) {
-								processImage(zipSrc.getName() + "!/" + entry.getName(), bis, outStream, resizeFactor);
-							} else {
-								IOUtils.copy(bis, outStream);
-							}
-
-							outStream.closeEntry();
-							bis.close();
-						}
-
-					} catch (Exception e)
-					{
-						logger.log(Level.SEVERE, "Can't process file: "+file.getAbsolutePath(), e);
-					}
-					finally
-					{
-						try
-						{
-							if(zipSrc!=null) zipSrc.close();
-							if(outStream!=null) outStream.close();
-						} catch (IOException e)
-						{
-							logger.log(Level.SEVERE, "Can't close zip streams for file: "+file.getAbsolutePath(), e);
-						}
-					}
+					processArchive(file, targetFile, resizeFactor);
 				} else if (ImageType.findType(file.getName()) != null) {
 					logger.info("Processing image: " + file.getAbsolutePath());
 
@@ -136,6 +82,67 @@ public class FixIconsProcessor
 
 		}
 
+	}
+
+	private void processArchive(File file, File targetFile, float resizeFactor)
+			throws Exception {
+
+		ZipFile zipSrc = null;
+		ZipOutputStream outStream = null;
+		try
+		{
+			zipSrc = new ZipFile(file);
+			Enumeration<? extends ZipEntry> srcEntries = zipSrc.entries();
+
+			outStream = new ZipOutputStream(
+					new FileOutputStream(targetFile));
+
+			while (srcEntries.hasMoreElements()) {
+				ZipEntry entry = (ZipEntry) srcEntries.nextElement();
+				logger.info("Processing zip entry [" + entry.getName()
+						+ "]");
+
+				ZipEntry newEntry = new ZipEntry(entry.getName());
+				try {
+					outStream.putNextEntry(newEntry);
+				} catch (Exception e) {
+					if (!e.getMessage().startsWith("duplicate entry: ")) {
+						logger.log(Level.SEVERE, "Error: ", e);
+					} else {
+						logger.log(Level.SEVERE, e.getMessage(), e);
+					}
+					outStream.closeEntry();
+					continue;
+				}
+
+				BufferedInputStream bis = new BufferedInputStream(
+						zipSrc.getInputStream(entry));
+
+				if (ImageType.findType(entry.getName()) != null) {
+					processImage(zipSrc.getName() + "!/" + entry.getName(), bis, outStream, resizeFactor);
+				} else {
+					IOUtils.copy(bis, outStream);
+				}
+
+				outStream.closeEntry();
+				bis.close();
+			}
+
+		} catch (Exception e)
+		{
+			logger.log(Level.SEVERE, "Can't process file: "+file.getAbsolutePath(), e);
+		}
+		finally
+		{
+			try
+			{
+				if(zipSrc!=null) zipSrc.close();
+				if(outStream!=null) outStream.close();
+			} catch (IOException e)
+			{
+				logger.log(Level.SEVERE, "Can't close zip streams for file: "+file.getAbsolutePath(), e);
+			}
+		}
 	}
 
 	public void processImage(String fileName, InputStream input,
