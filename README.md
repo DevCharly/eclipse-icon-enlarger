@@ -11,15 +11,15 @@ Scales Eclipse icons (PNG and GIF) to double their size for QHD laptops.
 
 #### How To Run
 
-java -jar eclipse-icon-enlarger.jar -b c:\eclipse -o c:\Temp\eclipse_qhd
- -b,--baseDir <arg>        This is the base directory where we'll parse
-                           jars/zips
- -h,--help <arg>           Show help
- -o,--outputDir <arg>      This is the base directory where we'll place
-                           output
- -z,--resizeFactor <arg>   This is the resize factor. Default is 2.
- 
- #### Attention
+    java -jar eclipse-icon-enlarger.jar -b c:\eclipse -o c:\Temp\eclipse_qhd
+     -b,--baseDir <arg>        This is the base directory where we'll parse
+                               jars/zips
+     -h,--help <arg>           Show help
+     -o,--outputDir <arg>      This is the base directory where we'll place
+                               output
+     -z,--resizeFactor <arg>   This is the resize factor. Default is 2.
+
+#### Attention
  
  We recommend:
  
