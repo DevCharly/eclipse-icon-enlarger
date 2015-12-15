@@ -33,6 +33,8 @@ public class FixIcons {
 				"This is the base directory where we'll place output");
 		Option resizeFactor = new Option("z", "resizeFactor", true,
 				"This is the resize factor. Default is 2.");
+		Option parallelThreads = new Option("p", "parallelThreads", true,
+				"Number of parallel threads. Default is available CPU cores.");
 		Option help = new Option("h", "help", true,
 				"Show help");
 		baseDir.setRequired(true);
@@ -41,6 +43,7 @@ public class FixIcons {
 		options.addOption(baseDir);
 		options.addOption(outputDir);
 		options.addOption(resizeFactor);
+		options.addOption(parallelThreads);
 		options.addOption(help);
 	}
 
@@ -107,7 +110,23 @@ public class FixIcons {
 			}
 			logger.info("Resize factor: " + resizeFactor);
 
-			new FixIconsProcessor().processDirectory(base, output, resizeFactor);
+			String parallelThreadsStr = commandLine.getOptionValue("p");
+			int parallelThreads = Runtime.getRuntime().availableProcessors();
+			if(parallelThreadsStr!=null)
+			{
+				try
+				{
+					parallelThreads = Integer.parseInt(parallelThreadsStr);
+				} catch (NumberFormatException e)
+				{
+					logger.severe("Can't parse provided parallelThreads'" +parallelThreadsStr+"'");
+					return;
+				}
+			}
+			logger.info("Parallel threads: " + parallelThreads);
+
+			
+			new FixIconsProcessor().process(base, output, resizeFactor, parallelThreads);
 
 		} catch (ParseException e) {
 			logger.severe("Unable to parse arguments: " + e.getMessage());

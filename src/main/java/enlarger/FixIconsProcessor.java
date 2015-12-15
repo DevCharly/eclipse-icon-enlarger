@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -24,7 +27,22 @@ public class FixIconsProcessor
 {
 	private static final Logger logger = Logger.getGlobal();
 	
-	public void processDirectory(File directory, File outputDirectory, float resizeFactor)
+	public void process(File directory, File outputDirectory, float resizeFactor, int parallelThreads)
+			throws Exception {
+
+		ExecutorService threadPool = (parallelThreads > 1)
+				? Executors.newFixedThreadPool(parallelThreads)
+				: null;
+
+		processDirectory(threadPool, directory, outputDirectory, resizeFactor);
+
+		if (threadPool != null) {
+			threadPool.shutdown();
+			threadPool.awaitTermination(1, TimeUnit.DAYS);
+		}
+	}
+	
+	private void processDirectory(ExecutorService threadPool, File directory, File outputDirectory, float resizeFactor)
 			throws Exception {
 		logger.info("Processing directory [" + directory.getAbsolutePath()
 				+ "]");
@@ -36,17 +54,29 @@ public class FixIconsProcessor
 				logger.info("Creating directory: "
 						+ targetDir.getAbsolutePath());
 				targetDir.mkdir();
-				processDirectory(file, targetDir, resizeFactor);
+				processDirectory(threadPool, file, targetDir, resizeFactor);
 			} else {
 				File targetFile = new File(outputDirectory.getAbsolutePath()
 						+ File.separator + file.getName());
 
 				if (file.getName().toLowerCase().endsWith(".zip")
 						|| file.getName().toLowerCase().endsWith(".jar")) {
-					logger.info("Processing archive file: "
-							+ file.getAbsolutePath());
 
-					processArchive(file, targetFile, resizeFactor);
+					Runnable runable = () -> {
+						logger.info("Processing archive file: "
+								+ file.getAbsolutePath());
+
+						try {
+							processArchive(file, targetFile, resizeFactor);
+						} catch (Exception e) {
+							logger.log(Level.SEVERE, "Unexpected error in processing archive " + file.getAbsolutePath() + ": " + e.getMessage(), e);
+						}
+					};
+
+					if (threadPool != null)
+						threadPool.execute(runable);
+					else
+						runable.run();
 				} else if (ImageType.findType(file.getName()) != null) {
 					logger.info("Processing image: " + file.getAbsolutePath());
 
