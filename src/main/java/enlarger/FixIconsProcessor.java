@@ -20,9 +20,6 @@ import javax.imageio.ImageIO;
 import org.apache.commons.io.IOUtils;
 import org.imgscalr.Scalr;
 
-import com.mortennobel.imagescaling.AdvancedResizeOp;
-import com.mortennobel.imagescaling.ResampleOp;
-
 public class FixIconsProcessor
 {
 	private static final Logger logger = Logger.getGlobal();
@@ -173,17 +170,7 @@ public class FixIconsProcessor
 
 	private BufferedImage createResizedCopy(BufferedImage originalImage, int scaledWidth, int scaledHeight) {
 		
-		try {
-			ResampleOp resampleOp = new ResampleOp(scaledWidth,scaledHeight);
-			resampleOp.setUnsharpenMask(AdvancedResizeOp.UnsharpenMask.Normal);
-			BufferedImage scaledBI = resampleOp.filter(originalImage, null);
-
-			return scaledBI;
-		} catch (RuntimeException e) {
-			
-			// Resample failed - maybe the image was too small, try another way (Scalr)
-			BufferedImage scaledBI = Scalr.resize(originalImage, Scalr.Method.ULTRA_QUALITY, scaledWidth, scaledHeight);
-			return scaledBI;
-		}
+		BufferedImage scaledBI = Scalr.resize(originalImage, Scalr.Method.QUALITY, scaledWidth, scaledHeight);
+		return scaledBI;
 	}
 }
