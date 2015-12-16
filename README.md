@@ -1,7 +1,7 @@
 eclipse-icon-enlarger
 =====================
 
-Scales Eclipse icons (PNG and GIF) to double their size for QHD laptops.
+Scales Eclipse icons (PNG, GIF and JPG) to double their size for QHD laptops.
 
 #### How To Build
 

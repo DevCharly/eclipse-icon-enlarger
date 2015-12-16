@@ -3,7 +3,8 @@ package enlarger;
 public enum ImageType {
 
 	PNG(".png"),
-	GIF(".gif");
+	GIF(".gif"),
+	JPEG(".jpg");
 	
 	private String suffix;
 
