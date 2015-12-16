@@ -27,14 +27,20 @@ public class FixIconsProcessor
 {
 	private static final Logger logger = Logger.getGlobal();
 	
-	public void process(File directory, File outputDirectory, float resizeFactor, int parallelThreads)
+	private float resizeFactor;
+
+	public FixIconsProcessor(float resizeFactor) {
+		this.resizeFactor = resizeFactor;
+	}
+	
+	public void process(File directory, File outputDirectory, int parallelThreads)
 			throws Exception {
 
 		ExecutorService threadPool = (parallelThreads > 1)
 				? Executors.newFixedThreadPool(parallelThreads)
 				: null;
 
-		processDirectory(threadPool, directory, outputDirectory, resizeFactor);
+		processDirectory(threadPool, directory, outputDirectory);
 
 		if (threadPool != null) {
 			threadPool.shutdown();
@@ -42,7 +48,7 @@ public class FixIconsProcessor
 		}
 	}
 	
-	private void processDirectory(ExecutorService threadPool, File directory, File outputDirectory, float resizeFactor)
+	private void processDirectory(ExecutorService threadPool, File directory, File outputDirectory)
 			throws Exception {
 		logger.info("Processing directory [" + directory.getAbsolutePath()
 				+ "]");
@@ -54,7 +60,7 @@ public class FixIconsProcessor
 				logger.info("Creating directory: "
 						+ targetDir.getAbsolutePath());
 				targetDir.mkdir();
-				processDirectory(threadPool, file, targetDir, resizeFactor);
+				processDirectory(threadPool, file, targetDir);
 			} else {
 				File targetFile = new File(outputDirectory.getAbsolutePath()
 						+ File.separator + file.getName());
@@ -67,7 +73,7 @@ public class FixIconsProcessor
 								+ file.getAbsolutePath());
 
 						try {
-							processArchive(file, targetFile, resizeFactor);
+							processArchive(file, targetFile);
 						} catch (Exception e) {
 							logger.log(Level.SEVERE, "Unexpected error in processing archive " + file.getAbsolutePath() + ": " + e.getMessage(), e);
 						}
@@ -86,7 +92,7 @@ public class FixIconsProcessor
 					try {
 						inStream = new FileInputStream(file);
 						outStream = new FileOutputStream(targetFile);
-						processImage(file.getName(), inStream, outStream, resizeFactor);
+						processImage(file.getName(), inStream, outStream);
 					} finally {
 						IOUtils.closeQuietly(inStream);
 						IOUtils.closeQuietly(outStream);
@@ -114,7 +120,7 @@ public class FixIconsProcessor
 
 	}
 
-	private void processArchive(File file, File targetFile, float resizeFactor)
+	private void processArchive(File file, File targetFile)
 			throws Exception {
 
 		ZipFile zipSrc = null;
@@ -149,7 +155,7 @@ public class FixIconsProcessor
 						zipSrc.getInputStream(entry));
 
 				if (ImageType.findType(entry.getName()) != null) {
-					processImage(zipSrc.getName() + "!/" + entry.getName(), bis, outStream, resizeFactor);
+					processImage(zipSrc.getName() + "!/" + entry.getName(), bis, outStream);
 				} else {
 					IOUtils.copy(bis, outStream);
 				}
@@ -176,7 +182,7 @@ public class FixIconsProcessor
 	}
 
 	public void processImage(String fileName, InputStream input,
-			OutputStream output, float resizeFactor) throws IOException {
+			OutputStream output) throws IOException {
 
 		logger.info("Scaling image: " + fileName);
 

@@ -126,7 +126,7 @@ public class FixIcons {
 			logger.info("Parallel threads: " + parallelThreads);
 
 			
-			new FixIconsProcessor().process(base, output, resizeFactor, parallelThreads);
+			new FixIconsProcessor(resizeFactor).process(base, output, parallelThreads);
 
 		} catch (ParseException e) {
 			logger.severe("Unable to parse arguments: " + e.getMessage());
