@@ -35,6 +35,8 @@ public class FixIcons {
 				"This is the resize factor. Default is 2.");
 		Option parallelThreads = new Option("p", "parallelThreads", true,
 				"Number of parallel threads. Default is available CPU cores.");
+		Option saveGifInPngFormat = new Option("g", "saveGifInPngFormat", false,
+				"Save .gif files in PNG format for much better quality.");
 		Option help = new Option("h", "help", false,
 				"Show help");
 		baseDir.setRequired(true);
@@ -44,6 +46,7 @@ public class FixIcons {
 		options.addOption(outputDir);
 		options.addOption(resizeFactor);
 		options.addOption(parallelThreads);
+		options.addOption(saveGifInPngFormat);
 		options.addOption(help);
 	}
 
@@ -125,8 +128,9 @@ public class FixIcons {
 			}
 			logger.info("Parallel threads: " + parallelThreads);
 
-			
-			new FixIconsProcessor(resizeFactor).process(base, output, parallelThreads);
+			boolean saveGifInPngFormat = commandLine.hasOption("g");
+
+			new FixIconsProcessor(resizeFactor, saveGifInPngFormat).process(base, output, parallelThreads);
 
 		} catch (ParseException e) {
 			logger.severe("Unable to parse arguments: " + e.getMessage());

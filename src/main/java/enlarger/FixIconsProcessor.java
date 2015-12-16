@@ -28,9 +28,11 @@ public class FixIconsProcessor
 	private static final Logger logger = Logger.getGlobal();
 	
 	private float resizeFactor;
+	private boolean saveGifInPngFormat;
 
-	public FixIconsProcessor(float resizeFactor) {
+	public FixIconsProcessor(float resizeFactor, boolean saveGifInPngFormat) {
 		this.resizeFactor = resizeFactor;
+		this.saveGifInPngFormat = saveGifInPngFormat;
 	}
 	
 	public void process(File directory, File outputDirectory, int parallelThreads)
@@ -195,8 +197,10 @@ public class FixIconsProcessor
 
 			BufferedImage rescaledOut = createResizedCopy(out, outWidth, outHeight);
 
-			ImageIO.write(rescaledOut, ImageType.findType(fileName).name(),
-					output);
+			String imageFormatName = ImageType.findType(fileName).name();
+			if (saveGifInPngFormat && "GIF".equals(imageFormatName))
+				imageFormatName = "PNG";
+			ImageIO.write(rescaledOut, imageFormatName, output);
 
 		} catch (Exception e) {
 			if (imageWriteStarted) {

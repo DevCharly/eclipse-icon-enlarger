@@ -16,6 +16,7 @@ Scales Eclipse icons (PNG, GIF and JPG) to increase their size for HiDPI display
      -o,--outputDir <arg>       This is the base directory where we'll place output
      -z,--resizeFactor <arg>    This is the resize factor. Default is 2.
      -p,--parallelThreads <arg> Number of parallel threads. Default is available CPU cores.
+     -g,--saveGifInPngFormat    Save .gif files in PNG format for much better quality.
      -h,--help                  Show help
 
 #### Attention
