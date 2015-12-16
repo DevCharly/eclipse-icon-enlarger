@@ -35,7 +35,7 @@ public class FixIcons {
 				"This is the resize factor. Default is 2.");
 		Option parallelThreads = new Option("p", "parallelThreads", true,
 				"Number of parallel threads. Default is available CPU cores.");
-		Option help = new Option("h", "help", true,
+		Option help = new Option("h", "help", false,
 				"Show help");
 		baseDir.setRequired(true);
 		outputDir.setRequired(true);
