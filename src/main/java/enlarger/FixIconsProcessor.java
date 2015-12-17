@@ -55,14 +55,14 @@ public class FixIconsProcessor
 	
 	private void processDirectory(ExecutorService threadPool, File directory, File outputDirectory)
 			throws Exception {
-		logger.info("Processing directory [" + directory.getAbsolutePath()
+		logger.fine("Processing directory [" + directory.getAbsolutePath()
 				+ "]");
 
 		for (File file : directory.listFiles()) {
 			if (file.isDirectory()) {
 				File targetDir = new File(outputDirectory.getAbsolutePath()
 						+ File.separator + file.getName());
-				logger.info("Creating directory: "
+				logger.finer("Creating directory: "
 						+ targetDir.getAbsolutePath());
 				targetDir.mkdir();
 				processDirectory(threadPool, file, targetDir);
@@ -74,7 +74,7 @@ public class FixIconsProcessor
 						|| file.getName().toLowerCase().endsWith(".jar")) {
 
 					Runnable runable = () -> {
-						logger.info("Processing archive file: "
+						logger.fine("Processing archive file: "
 								+ file.getAbsolutePath());
 
 						try {
@@ -91,7 +91,7 @@ public class FixIconsProcessor
 				} else if (ImageType.findType(file.getName()) != null &&
 					(imageFilter == null || imageFilter.accept(directory, file.getName())))
 				{
-					logger.info("Processing image: " + file.getAbsolutePath());
+					logger.finer("Processing image: " + file.getAbsolutePath());
 
 					FileInputStream inStream = null;
 					FileOutputStream outStream = null;
@@ -105,7 +105,7 @@ public class FixIconsProcessor
 						IOUtils.closeQuietly(outStream);
 					}
 				} else {
-					logger.info("Processing : " + file.getAbsolutePath());
+					logger.finer("Processing : " + file.getAbsolutePath());
 
 					FileInputStream inStream = null;
 					FileOutputStream outStream = null;
@@ -142,7 +142,7 @@ public class FixIconsProcessor
 
 			while (srcEntries.hasMoreElements()) {
 				ZipEntry entry = (ZipEntry) srcEntries.nextElement();
-				logger.info("Processing zip entry [" + entry.getName()
+				logger.finer("Processing zip entry [" + entry.getName()
 						+ "]");
 
 				ZipEntry newEntry = new ZipEntry(entry.getName());
@@ -193,7 +193,7 @@ public class FixIconsProcessor
 	public void processImage(String fileName, InputStream input,
 			OutputStream output) throws IOException {
 
-		logger.info("Scaling image: " + fileName);
+		logger.finer("Scaling image: " + fileName);
 
 		boolean imageWriteStarted = false;
 		try {
