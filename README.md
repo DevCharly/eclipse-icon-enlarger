@@ -14,6 +14,8 @@ Scales Eclipse icons (PNG, GIF and JPG) to increase their size for HiDPI display
     java -jar eclipse-icon-enlarger.jar -b c:\eclipse -o c:\Temp\eclipse_qhd
      -b,--baseDir <arg>         This is the base directory where we'll parse jars/zips
      -o,--outputDir <arg>       This is the base directory where we'll place output
+     -i,--imageIncludes <arg>   Comma-separated list of image files (wildcard patterns) that are included. Default is all.
+     -e,--imageExcludes <arg>   Comma-separated list of image files (wildcard patterns) that are excluded. Default is none.
      -z,--resizeFactor <arg>    This is the resize factor. Default is 2.
      -p,--parallelThreads <arg> Number of parallel threads. Default is available CPU cores.
      -g,--saveGifInPngFormat    Save .gif files in PNG format for much better quality.

@@ -5,6 +5,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,12 +28,14 @@ public class FixIconsProcessor
 {
 	private static final Logger logger = Logger.getGlobal();
 	
-	private float resizeFactor;
-	private boolean saveGifInPngFormat;
+	private final float resizeFactor;
+	private final boolean saveGifInPngFormat;
+	private final FilenameFilter imageFilter;
 
-	public FixIconsProcessor(float resizeFactor, boolean saveGifInPngFormat) {
+	public FixIconsProcessor(float resizeFactor, boolean saveGifInPngFormat, FilenameFilter imageFilter) {
 		this.resizeFactor = resizeFactor;
 		this.saveGifInPngFormat = saveGifInPngFormat;
+		this.imageFilter = imageFilter;
 	}
 	
 	public void process(File directory, File outputDirectory, int parallelThreads)
@@ -85,7 +88,9 @@ public class FixIconsProcessor
 						threadPool.execute(runable);
 					else
 						runable.run();
-				} else if (ImageType.findType(file.getName()) != null) {
+				} else if (ImageType.findType(file.getName()) != null &&
+					(imageFilter == null || imageFilter.accept(directory, file.getName())))
+				{
 					logger.info("Processing image: " + file.getAbsolutePath());
 
 					FileInputStream inStream = null;
@@ -156,7 +161,9 @@ public class FixIconsProcessor
 				BufferedInputStream bis = new BufferedInputStream(
 						zipSrc.getInputStream(entry));
 
-				if (ImageType.findType(entry.getName()) != null) {
+				if (ImageType.findType(entry.getName()) != null &&
+					(imageFilter == null || imageFilter.accept(file, entry.getName())))
+				{
 					processImage(zipSrc.getName() + "!/" + entry.getName(), bis, outStream);
 				} else {
 					IOUtils.copy(bis, outStream);

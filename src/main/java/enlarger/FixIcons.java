@@ -1,6 +1,8 @@
 package enlarger;
 
 import java.io.File;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -10,6 +12,10 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.filefilter.AndFileFilter;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.NotFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 /**
  * Small utility to double the size of eclipse icons for QHD monitors.
@@ -31,6 +37,10 @@ public class FixIcons {
 				"This is the base directory where we'll parse jars/zips");
 		Option outputDir = new Option("o", "outputDir", true,
 				"This is the base directory where we'll place output");
+		Option imageIncludes = new Option("i", "imageIncludes", true,
+				"Comma-separated list of image files (wildcard patterns) that are included. Default is all.");
+		Option imageExcludes = new Option("e", "imageExcludes", true,
+				"Comma-separated list of image files (wildcard patterns) that are excluded. Default is none.");
 		Option resizeFactor = new Option("z", "resizeFactor", true,
 				"This is the resize factor. Default is 2.");
 		Option parallelThreads = new Option("p", "parallelThreads", true,
@@ -44,6 +54,8 @@ public class FixIcons {
 		
 		options.addOption(baseDir);
 		options.addOption(outputDir);
+		options.addOption(imageIncludes);
+		options.addOption(imageExcludes);
 		options.addOption(resizeFactor);
 		options.addOption(parallelThreads);
 		options.addOption(saveGifInPngFormat);
@@ -129,8 +141,19 @@ public class FixIcons {
 			logger.info("Parallel threads: " + parallelThreads);
 
 			boolean saveGifInPngFormat = commandLine.hasOption("g");
+			String imageIncludes = commandLine.getOptionValue('i');
+			String imageExcludes = commandLine.getOptionValue('e');
+			FilenameFilter imageFilter = buildFilter(imageIncludes, imageExcludes);
 
-			new FixIconsProcessor(resizeFactor, saveGifInPngFormat).process(base, output, parallelThreads);
+			if (saveGifInPngFormat)
+				logger.info("Save .gif files in PNG format: true");
+			if (imageIncludes != null)
+				logger.info("Image includes: " + imageIncludes);
+			if (imageExcludes != null)
+				logger.info("Image excludes: " + imageExcludes);
+
+			new FixIconsProcessor(resizeFactor, saveGifInPngFormat,imageFilter)
+				.process(base, output, parallelThreads);
 
 		} catch (ParseException e) {
 			logger.severe("Unable to parse arguments: " + e.getMessage());
@@ -139,6 +162,15 @@ public class FixIcons {
 			logger.log(Level.SEVERE, "Unexpected error: " + e.getMessage(), e);
 			printHelp();
 		}
+	}
+	
+	private static FilenameFilter buildFilter(String includes, String excludes) {
+		ArrayList<IOFileFilter> filters = new ArrayList<IOFileFilter>();
+		if (includes != null)
+			filters.add(new WildcardFileFilter(includes.split(",")));
+		if (excludes != null)
+			filters.add(new NotFileFilter(new WildcardFileFilter(excludes.split(","))));
+		return filters.isEmpty() ? null : new AndFileFilter(filters);
 	}
 	
 	private static void printHelp()
