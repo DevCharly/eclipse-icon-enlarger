@@ -37,9 +37,13 @@ public class FixIcons {
 				"This is the base directory where we'll parse jars/zips");
 		Option outputDir = new Option("o", "outputDir", true,
 				"This is the base directory where we'll place output");
-		Option imageIncludes = new Option("i", "imageIncludes", true,
+		Option includes = new Option("i", "includes", true,
+				"Comma-separated list of directories/jars/zips (wildcard patterns) that are included. Default is all.");
+		Option excludes = new Option("e", "excludes", true,
+				"Comma-separated list of directories/jars/zips (wildcard patterns) that are excluded. Default is none.");
+		Option imageIncludes = new Option("I", "imageIncludes", true,
 				"Comma-separated list of image files (wildcard patterns) that are included. Default is all.");
-		Option imageExcludes = new Option("e", "imageExcludes", true,
+		Option imageExcludes = new Option("E", "imageExcludes", true,
 				"Comma-separated list of image files (wildcard patterns) that are excluded. Default is none.");
 		Option resizeFactor = new Option("z", "resizeFactor", true,
 				"This is the resize factor. Default is 2.");
@@ -54,6 +58,8 @@ public class FixIcons {
 		
 		options.addOption(baseDir);
 		options.addOption(outputDir);
+		options.addOption(includes);
+		options.addOption(excludes);
 		options.addOption(imageIncludes);
 		options.addOption(imageExcludes);
 		options.addOption(resizeFactor);
@@ -141,18 +147,25 @@ public class FixIcons {
 			logger.info("Parallel threads: " + parallelThreads);
 
 			boolean saveGifInPngFormat = commandLine.hasOption("g");
-			String imageIncludes = commandLine.getOptionValue('i');
-			String imageExcludes = commandLine.getOptionValue('e');
+			String includes = commandLine.getOptionValue('i');
+			String excludes = commandLine.getOptionValue('e');
+			String imageIncludes = commandLine.getOptionValue('I');
+			String imageExcludes = commandLine.getOptionValue('E');
+			FilenameFilter filter = buildFilter(includes, excludes);
 			FilenameFilter imageFilter = buildFilter(imageIncludes, imageExcludes);
 
 			if (saveGifInPngFormat)
 				logger.info("Save .gif files in PNG format: true");
+			if (includes != null)
+				logger.info("Includes: " + includes);
+			if (excludes != null)
+				logger.info("Excludes: " + excludes);
 			if (imageIncludes != null)
 				logger.info("Image includes: " + imageIncludes);
 			if (imageExcludes != null)
 				logger.info("Image excludes: " + imageExcludes);
 
-			new FixIconsProcessor(resizeFactor, saveGifInPngFormat,imageFilter)
+			new FixIconsProcessor(resizeFactor, saveGifInPngFormat, filter, imageFilter)
 				.process(base, output, parallelThreads);
 
 		} catch (ParseException e) {

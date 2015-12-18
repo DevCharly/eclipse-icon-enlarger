@@ -30,11 +30,14 @@ public class FixIconsProcessor
 	
 	private final float resizeFactor;
 	private final boolean saveGifInPngFormat;
+	private final FilenameFilter filter;
 	private final FilenameFilter imageFilter;
 
-	public FixIconsProcessor(float resizeFactor, boolean saveGifInPngFormat, FilenameFilter imageFilter) {
+	public FixIconsProcessor(float resizeFactor, boolean saveGifInPngFormat,
+			FilenameFilter filter, FilenameFilter imageFilter) {
 		this.resizeFactor = resizeFactor;
 		this.saveGifInPngFormat = saveGifInPngFormat;
+		this.filter = filter;
 		this.imageFilter = imageFilter;
 	}
 	
@@ -58,15 +61,29 @@ public class FixIconsProcessor
 		logger.fine("Processing directory [" + directory.getAbsolutePath()
 				+ "]");
 
+		boolean directoryCreated = false;
+
 		for (File file : directory.listFiles()) {
 			if (file.isDirectory()) {
 				File targetDir = new File(outputDirectory.getAbsolutePath()
 						+ File.separator + file.getName());
-				logger.finer("Creating directory: "
-						+ targetDir.getAbsolutePath());
-				targetDir.mkdir();
+				if (filter == null) {
+					logger.finer("Creating directory: "
+							+ targetDir.getAbsolutePath());
+					targetDir.mkdir();
+				}
 				processDirectory(threadPool, file, targetDir);
 			} else {
+				if (filter != null && !filter.accept(directory, file.getPath().replace('\\', '/')))
+					continue;
+
+				if (filter != null && !directoryCreated) {
+					logger.finer("Creating directory: "
+							+ outputDirectory.getAbsolutePath());
+					outputDirectory.mkdirs();
+					directoryCreated = true;
+				}
+
 				File targetFile = new File(outputDirectory.getAbsolutePath()
 						+ File.separator + file.getName());
 
